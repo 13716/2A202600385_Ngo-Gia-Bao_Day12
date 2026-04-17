@@ -5,7 +5,7 @@
 Hãy đếm bao nhiêu vấn đề bạn tìm được trong file này.
 """
 import os
-
+from fastapi import FastAPI, Body 
 from fastapi import FastAPI
 import uvicorn
 from utils.mock_llm import ask
@@ -28,7 +28,7 @@ def home():
 
 
 @app.post("/ask")
-def ask_agent(question: str):
+def ask_agent(question: str = Body(..., embed=True)):
     # ❌ Vấn đề 3: Print thay vì proper logging
     print(f"[DEBUG] Got question: {question}")
     print(f"[DEBUG] Using key: {OPENAI_API_KEY}")  # ❌ log ra secret!

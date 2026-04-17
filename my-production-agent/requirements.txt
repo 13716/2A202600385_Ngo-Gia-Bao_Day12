@@ -1,0 +1,7 @@
+fastapi[all]
+uvicorn
+pydantic-settings
+redis
+python-jose[cryptography]
+passlib[bcrypt]
+pydantic>=2.0.0

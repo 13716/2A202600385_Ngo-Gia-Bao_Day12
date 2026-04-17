@@ -1,0 +1,19 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.git
+.gitignore
+.dockerignore
+.env
+.env.*
+! .env.example
+*.md
+.vscode/
+.idea/
+*.log
+.DS_Store
