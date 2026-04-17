@@ -82,6 +82,14 @@ app.add_middleware(
     allow_headers=["Content-Type", "X-API-Key", "Authorization", "Accept"],
 )
 
+@app.get("/")
+async def root():
+    return {
+        "message": "Welcome to Production AI Agent API",
+        "status": "online",
+        "author": "Ngo Gia Bao"
+    }
+
 @app.post("/ask")
 async def ask(
     body: AskRequest,
