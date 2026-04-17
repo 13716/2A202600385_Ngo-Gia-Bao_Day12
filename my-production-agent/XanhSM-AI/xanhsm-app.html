@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Xanh SM - Ứng dụng Giao Thông</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --xanh-primary: #00CED1;
+            --xanh-dark: #00A8AA;
+            --xanh-light: #7FFFD4;
+            --xanh-bg: #F0FFFE;
+            --orange: #FFB84D;
+            --red: #FF4757;
+            --text-dark: #1A1A1A;
+            --text-gray: #666666;
+            --text-light: #999999;
+            --white: #FFFFFF;
+            --bg-light: #F8F9FA;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background: var(--bg-light);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* App Container */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Screen Base */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 44px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 14px;
+            color: var(--text-dark);
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .status-left {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .status-right {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .battery {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #F0F0F0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-size: 24px;
+        }
+
+        .top-bar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+            flex: 1;
+            text-align: center;
+        }
+
+        .top-bar-action {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        /* HOME SCREEN */
+        .home-header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .aqi-badge {
+            background: linear-gradient(135deg, var(--orange) 0%, #FF8C42 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .vinclub {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        /* Search Box */
+        .search-box {
+            margin: 16px;
+            background: white;
+            border: 2px solid var(--xanh-primary);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 206, 209, 0.1);
+        }
+
+        .search-icon {
+            color: var(--xanh-primary);
+            font-size: 20px;
+        }
+
+        .search-text {
+            flex: 1;
+            color: var(--text-dark);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .time-icon {
+            color: var(--xanh-primary);
+            font-size: 18px;
+        }
+
+        /* Services Grid */
+        .services-section {
+            padding: 0 16px 16px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .service-item {
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .service-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 8px;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s;
+        }
+
+        .service-item:active .service-icon {
+            transform: scale(0.95);
+        }
+
+        .service-label {
+            font-size: 13px;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .hot-tag {
+            position: absolute;
+            top: 0;
+            right: 8px;
+            background: linear-gradient(135deg, var(--red) 0%, #FF6B6B 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Promo Banner */
+        .promo-section {
+            padding: 0 16px 16px;
+        }
+
+        .promo-banner {
+            background: linear-gradient(135deg, var(--xanh-primary) 0%, var(--xanh-dark) 100%);
+            border-radius: 20px;
+            padding: 28px 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .promo-logo {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .promo-title {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .promo-subtitle-1 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .promo-subtitle-2 {
+            font-size: 12px;
+            opacity: 0.95;
+            margin-bottom: 16px;
+        }
+
+        .promo-cta {
+            background: white;
+            color: var(--xanh-primary);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 8px 16px 12px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #F0F0F0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 4px 12px;
+            color: var(--text-gray);
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--xanh-primary);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+        }
+
+        /* DELIVERY SCREEN */
+        .delivery-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .delivery-tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .delivery-tab.active {
+            color: var(--text-dark);
+        }
+
+        .delivery-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--xanh-primary);
+        }
+
+        .delivery-content {
+            padding: 16px;
+        }
+
+        .delivery-notice {
+            background: rgba(0, 206, 209, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .notice-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .notice-text {
+            color: var(--text-dark);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .vehicle-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+
+        .new-service-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--xanh-primary) 0%, var(--xanh-dark) 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px 12px 0 0;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .vehicle-image {
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto 20px;
+        }
+
+        .vehicle-specs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 24px;
+            padding: 16px 0;
+            border-top: 1px solid #F0F0F0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .spec-item {
+            text-align: center;
+        }
+
+        .spec-label {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 4px;
+        }
+
+        .spec-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .price-box {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .price-label {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 4px;
+        }
+
+        .price-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--xanh-primary);
+        }
+
+        .select-vehicle-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--xanh-primary) 0%, var(--xanh-dark) 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 206, 209, 0.3);
+        }
+
+        .support-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .support-card {
+            background: linear-gradient(135deg, var(--xanh-primary) 0%, var(--xanh-dark) 100%);
+            border-radius: 16px;
+            padding: 20px 12px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .support-card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.2));
+        }
+
+        .support-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .support-text {
+            font-size: 12px;
+            line-height: 1.3;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* MAP/DESTINATION SCREEN */
+        .location-header {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .location-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--text-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .location-text {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .location-badge {
+            background: var(--red);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .location-city {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        .destination-input {
+            background: white;
+            padding: 16px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--xanh-bg);
+            padding: 12px 16px;
+            border-radius: 12px;
+        }
+
+        .input-icon {
+            color: var(--xanh-primary);
+            font-size: 20px;
+        }
+
+        .input-field {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 15px;
+            color: var(--xanh-primary);
+            font-weight: 500;
+        }
+
+        .input-field::placeholder {
+            color: var(--xanh-primary);
+        }
+
+        .add-btn {
+            color: var(--xanh-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .location-toggle {
+            background: rgba(255, 184, 77, 0.1);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 28px;
+            background: var(--xanh-primary);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+            transition: 0.3s;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            background: white;
+        }
+
+        .filter-tab {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #E0E0E0;
+            background: white;
+            color: var(--text-gray);
+        }
+
+        .filter-tab.active {
+            background: var(--text-dark);
+            color: white;
+            border-color: var(--text-dark);
+        }
+
+        .locations-list {
+            background: white;
+        }
+
+        .location-item {
+            padding: 16px;
+            border-bottom: 1px solid #F5F5F5;
+            display: flex;
+            gap: 16px;
+            cursor: pointer;
+        }
+
+        .location-item-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--text-gray);
+            flex-shrink: 0;
+        }
+
+        .location-item-content {
+            flex: 1;
+        }
+
+        .location-item-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .location-item-address {
+            font-size: 13px;
+            color: var(--text-gray);
+            line-height: 1.4;
+        }
+
+        .expand-link {
+            color: var(--xanh-primary);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px 16px;
+            display: block;
+            background: white;
+            border-top: 1px solid #F5F5F5;
+        }
+
+        .map-action {
+            background: white;
+            padding: 16px;
+            border-top: 1px solid #F0F0F0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .map-icon-btn {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .map-text {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        /* VOUCHER SCREEN */
+        .voucher-section {
+            padding: 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+        }
+
+        .voucher-cards {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .voucher-card {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+        }
+
+        .voucher-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .voucher-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .voucher-subtitle {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        .promo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .view-all {
+            color: var(--xanh-primary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .category-tab {
+            padding: 8px 20px;
+            background: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #E0E0E0;
+            color: var(--text-gray);
+        }
+
+        .category-tab.active {
+            background: var(--text-dark);
+            color: white;
+            border-color: var(--text-dark);
+        }
+
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .promo-card {
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .promo-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        /* CHAT SCREEN */
+        .chat-header {
+            background: linear-gradient(135deg, var(--xanh-primary) 0%, var(--xanh-dark) 100%);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-icon-box {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-title {
+            flex: 1;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+        }
+
+        .quick-actions {
+            padding: 16px;
+            background: var(--xanh-bg);
+            border-bottom: 1px solid rgba(0, 206, 209, 0.1);
+        }
+
+        .quick-btn {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: white;
+            border: 1px solid rgba(0, 206, 209, 0.2);
+            border-radius: 12px;
+            color: var(--xanh-primary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: var(--xanh-primary);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px 16px;
+            overflow-y: auto;
+            background: var(--xanh-bg);
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--xanh-primary) 0%, var(--xanh-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, var(--orange) 0%, #FF8C42 100%);
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            color: var(--text-dark);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-bubble {
+            background: var(--xanh-primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .typing {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+
+        .typing.active {
+            display: block;
+        }
+
+        .typing-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--xanh-primary);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .chat-input-area {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #F0F0F0;
+        }
+
+        .chat-input-box {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid rgba(0, 206, 209, 0.2);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            resize: none;
+            max-height: 120px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--xanh-primary);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--xanh-primary) 0%, var(--xanh-dark) 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+        }
+
+        /* Floating Bot Button */
+        .floating-bot {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--xanh-primary) 0%, var(--xanh-dark) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 206, 209, 0.3);
+            z-index: 1200;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 8px 24px rgba(0, 206, 209, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 8px 32px rgba(0, 206, 209, 0.5);
+            }
+        }
+
+        .bot-icon {
+            font-size: 32px;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Feedback Styles */
+        .feedback-bubble {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0, 206, 209, 0.1);
+        }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .stars {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .star {
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            filter: grayscale(1);
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .star.active {
+            filter: grayscale(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- HOME SCREEN -->
+        <div class="screen active" id="homeScreen">
+            <div class="status-bar">
+                <div class="status-left">
+                    <span>7:30</span>
+                    <span>🔒</span>
+                    <span>✅</span>
+                    <span>☁️</span>
+                </div>
+                <div class="status-right">
+                    <span>4.15 KB/s</span>
+                    <span>📡</span>
+                    <span>📶</span>
+                    <span>📡</span>
+                    <span>🔋 78</span>
+                </div>
+            </div>
+
+            <div class="home-header">
+                <div class="greeting">Xin chào, Ngô Gia Bảo</div>
+                <div class="header-badges">
+                    <div class="aqi-badge">142 AQI+</div>
+                    <div class="vinclub">VinClub</div>
+                </div>
+            </div>
+
+            <div class="search-box" onclick="navigateTo('mapScreen')">
+                <span class="search-icon">📍</span>
+                <span class="search-text">Bạn muốn đi đâu?</span>
+                <span class="time-icon">🕐</span>
+            </div>
+
+            <div class="services-section">
+                <div class="services-grid">
+                    <div class="service-item" onclick="navigateTo('mapScreen')">
+                        <div class="service-icon">🚗</div>
+                        <div class="service-label">Đặt ô tô</div>
+                    </div>
+                    <div class="service-item" onclick="navigateTo('mapScreen')">
+                        <div class="service-icon">✈️</div>
+                        <div class="service-label">Đi sân bay</div>
+                    </div>
+                    <div class="service-item" onclick="navigateTo('mapScreen')">
+                        <div class="hot-tag">HOT</div>
+                        <div class="service-icon">🏢</div>
+                        <div class="service-label">Đi Liên tỉnh</div>
+                    </div>
+                    <div class="service-item" onclick="navigateTo('mapScreen')">
+                        <div class="service-icon">🛵</div>
+                        <div class="service-label">Xe máy</div>
+                    </div>
+                    <div class="service-item" onclick="navigateTo('foodScreen')">
+                        <div class="service-icon">🍜</div>
+                        <div class="service-label">Đặt món ăn</div>
+                    </div>
+                    <div class="service-item" onclick="navigateTo('deliveryScreen')">
+                        <div class="hot-tag">HOT</div>
+                        <div class="service-icon">📦</div>
+                        <div class="service-label">Giao hàng</div>
+                    </div>
+                    <div class="service-item" onclick="navigateTo('voucherScreen')">
+                        <div class="service-icon">💌</div>
+                        <div class="service-label">Gói hội viên</div>
+                    </div>
+                    <div class="service-item" onclick="navigateTo('voucherScreen')">
+                        <div class="service-icon">🎁</div>
+                        <div class="service-label">Thẻ quà tặng</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="promo-section">
+                <div class="promo-banner" onclick="navigateTo('voucherScreen')" style="cursor: pointer;">
+                    <div class="promo-logo">✓ GREEN SM</div>
+                    <div class="promo-title">10% 🎉<br>TỚI 100K</div>
+                    <div class="promo-subtitle-1">XANH CHUNG TAY</div>
+                    <div class="promo-subtitle-2">ƯU ĐÃI DÀNH CHO TOÀN BỘ KHÁCH HÀNG<br>11.03 - 30.04.2026</div>
+                    <div class="promo-cta">CHỌN XANH LÀ VÌ TƯƠNG LAI XANH</div>
+                </div>
+            </div>
+
+            <div class="bottom-nav">
+                <div class="nav-item active">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Trang chủ</div>
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">📋</div>
+                    <div class="nav-label">Hoạt động</div>
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">🔍</div>
+                    <div class="nav-label">Khám phá</div>
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">🔔</div>
+                    <div class="nav-label">Thông báo</div>
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Tài khoản</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DELIVERY SCREEN -->
+        <div class="screen" id="deliveryScreen">
+            <div class="top-bar">
+                <div class="back-btn" onclick="navigateTo('homeScreen')">←</div>
+                <div class="top-bar-title">Dịch vụ giao hàng</div>
+                <div class="top-bar-action">📋</div>
+            </div>
+
+            <div class="delivery-tabs">
+                <div class="delivery-tab active">Xe tải nhỏ</div>
+                <div class="delivery-tab">Xe máy</div>
+            </div>
+
+            <div class="delivery-content">
+                <div class="delivery-notice">
+                    <div class="notice-icon">📦</div>
+                    <div class="notice-text">Phù hợp chở đồ nội thất, vật liệu xây dựng nhe, hàng hóa số lượng vừa và
+                        nhỏ</div>
+                </div>
+
+                <div class="vehicle-card">
+                    <div class="new-service-badge">NEW SERVICES</div>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect fill='%2300CED1' width='400' height='200' rx='20'/%3E%3Ctext x='200' y='100' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='Arial'%3E🚚 Xe Tải Xanh SM%3C/text%3E%3C/svg%3E"
+                        class="vehicle-image" alt="Xe tải nhỏ">
+
+                    <div class="vehicle-specs">
+                        <div class="spec-item">
+                            <div class="spec-label">Tải trọng</div>
+                            <div class="spec-value">580kg</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Khoang hàng</div>
+                            <div class="spec-value">1.47 x 1.45 x 1.22(m)</div>
+                        </div>
+                    </div>
+
+                    <div class="price-box">
+                        <div class="price-label">Giá từ</div>
+                        <div class="price-value">110,000đ</div>
+                    </div>
+
+                    <button class="select-vehicle-btn" onclick="navigateTo('mapScreen')">Chọn xe tải nhỏ</button>
+                </div>
+
+                <div style="margin-top: 24px; font-size: 18px; font-weight: 700; color: var(--text-dark);">Xanh hỗ trợ
+                    bạn</div>
+
+                <div class="support-cards">
+                    <div class="support-card">
+                        <div class="support-icon">📍</div>
+                        <div class="support-text">Xem vị trí xe theo thời gian thực</div>
+                    </div>
+                    <div class="support-card">
+                        <div class="support-icon">🗺️</div>
+                        <div class="support-text">Đơn giao nhiều điểm</div>
+                    </div>
+                    <div class="support-card">
+                        <div class="support-icon">📦</div>
+                        <div class="support-text">Hỗ trợ bốc xếp tại chỗ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAP/DESTINATION SCREEN -->
+        <div class="screen" id="mapScreen">
+            <div class="location-header">
+                <div class="back-btn" onclick="navigateTo('homeScreen')">←</div>
+                <div style="flex: 1;">
+                    <div class="location-text">Cổng Phụ - Trường Đại Học Vin...</div>
+                </div>
+                <div class="location-badge">⭐</div>
+                <div class="location-city">Hà Nội</div>
+            </div>
+
+            <div class="destination-input">
+                <div class="input-wrapper">
+                    <span class="input-icon">📍</span>
+                    <input type="text" class="input-field" placeholder="Tới điểm?" value="">
+                    <span class="add-btn">➕</span>
+                </div>
+            </div>
+
+            <div class="location-toggle">
+                <span>Hiển thị địa chỉ sau khi nhập tỉnh</span>
+                <div class="toggle-switch"></div>
+            </div>
+
+            <div class="filter-tabs">
+                <div class="filter-tab active">Đề xuất</div>
+                <div class="filter-tab">Gần đây</div>
+                <div class="filter-tab">Đã lưu</div>
+            </div>
+
+            <div class="locations-list">
+                <div class="location-item">
+                    <div class="location-item-icon">✈️</div>
+                    <div class="location-item-content">
+                        <div class="location-item-name">Ga Quốc Nội (T1) - Sân bay Quốc tế Nội Bài</div>
+                        <div class="location-item-address">Đường Võ Nguyên Giáp, Xã Nội Bài, Thành Phố Hà Nội, Việt Nam
+                        </div>
+                    </div>
+                </div>
+                <div class="location-item">
+                    <div class="location-item-icon">📍</div>
+                    <div class="location-item-content">
+                        <div class="location-item-name">Ga Đến Quốc Nội - Cột 7 - Sân Bay Quốc Tế Nội Bài</div>
+                    </div>
+                </div>
+                <div class="location-item">
+                    <div class="location-item-icon">📍</div>
+                    <div class="location-item-content">
+                        <div class="location-item-name">Ga Đi Quốc Nội - Cột 8 - Sân Bay Quốc Tế Nội Bài</div>
+                    </div>
+                </div>
+                <div class="expand-link">Xem thêm</div>
+                <div class="location-item">
+                    <div class="location-item-icon">✈️</div>
+                    <div class="location-item-content">
+                        <div class="location-item-name">Ga Quốc Tế (T2) - Sân bay Quốc tế Nội Bài</div>
+                        <div class="location-item-address">Đường Võ Nguyên Giáp, Xã Nội Bài, Thành Phố Hà Nội, Việt Nam
+                        </div>
+                    </div>
+                </div>
+                <div class="location-item">
+                    <div class="location-item-icon">📍</div>
+                    <div class="location-item-content">
+                        <div class="location-item-name">Ga Đến Quốc Tế - Sảnh A1 - Sân Bay Nội Bài</div>
+                    </div>
+                </div>
+                <div class="location-item">
+                    <div class="location-item-icon">📍</div>
+                    <div class="location-item-content">
+                        <div class="location-item-name">Ga Đi Quốc Tế - Sảnh D2 - Sân Bay Quốc Tế Nội Bài</div>
+                    </div>
+                </div>
+                <div class="expand-link">Xem thêm</div>
+            </div>
+
+            <div class="map-action">
+                <div class="map-icon-btn">🗺️</div>
+                <div class="map-text">Tìm trên bản đồ</div>
+            </div>
+        </div>
+
+        <!-- VOUCHER SCREEN -->
+        <div class="screen" id="voucherScreen">
+            <div class="top-bar">
+                <div class="back-btn" onclick="navigateTo('homeScreen')">←</div>
+                <div class="top-bar-title">Thẻ quà tặng</div>
+                <div class="top-bar-action"></div>
+            </div>
+
+            <div class="voucher-section">
+                <div class="voucher-cards">
+                    <div class="voucher-card">
+                        <div class="voucher-icon">🎁</div>
+                        <div class="voucher-title">Nạp thẻ quà tặng</div>
+                        <div class="voucher-subtitle">Nạp thẻ vật lý</div>
+                    </div>
+                    <div class="voucher-card">
+                        <div class="voucher-icon">💌</div>
+                        <div class="voucher-title">Thẻ quà của tôi</div>
+                        <div class="voucher-subtitle">Quản lý thẻ quà tặng</div>
+                    </div>
+                </div>
+
+                <div class="promo-header">
+                    <div class="section-title">☀️ Mua thẻ quà xinh, rủnh niềm vui đến</div>
+                    <div class="view-all">Xem tất cả</div>
+                </div>
+
+                <div class="category-tabs">
+                    <div class="category-tab active">Cặp đôi</div>
+                    <div class="category-tab">Bạn bè</div>
+                </div>
+
+                <div class="promo-grid">
+                    <div class="promo-card">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 360'%3E%3Cdefs%3E%3ClinearGradient id='g1' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%2387CEEB'/%3E%3Cstop offset='100%25' stop-color='%2398D8C8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23g1)' width='300' height='360'/%3E%3Ctext x='150' y='180' text-anchor='middle' dominant-baseline='middle' fill='%23333' font-size='32' font-family='Arial'%3E❤️ EM XIN LỖI ANH%3C/text%3E%3C/svg%3E"
+                            class="promo-image" alt="Promo 1">
+                    </div>
+                    <div class="promo-card">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 360'%3E%3Cdefs%3E%3ClinearGradient id='g2' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%2300CED1'/%3E%3Cstop offset='100%25' stop-color='%2300A8AA'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23g2)' width='300' height='360'/%3E%3Ctext x='150' y='180' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='28' font-family='Arial'%3E💕 TIẾN DÀY TÚI%3C/text%3E%3Ctext x='150' y='220' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='28' font-family='Arial'%3ETÌNH DÀY TIM%3C/text%3E%3C/svg%3E"
+                            class="promo-image" alt="Promo 2">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOD SCREEN -->
+        <div class="screen" id="foodScreen">
+            <div class="top-bar">
+                <div class="back-btn" onclick="navigateTo('homeScreen')">←</div>
+                <div class="top-bar-title">Xanh Ngon</div>
+                <div class="top-bar-action">🔍</div>
+            </div>
+
+            <div class="delivery-content">
+                <div style="height: 180px; border-radius: 16px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <img src="scene_app/food.jpg" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=1000&auto=format&fit=crop'">
+                </div>
+
+                <div style="margin-bottom: 16px; font-size: 18px; font-weight: 700; color: var(--text-dark);">Gợi ý cho bạn</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; gap: 16px; align-items: center; background: white; padding: 12px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="width: 80px; height: 80px; border-radius: 12px; background: #eee; flex-shrink: 0; overflow:hidden;">
+                            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=200&auto=format&fit=crop" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 15px; margin-bottom: 4px;">Phở Bát Đàn - Truyền thống</div>
+                            <div style="font-size: 12px; color: var(--text-gray); margin-bottom: 6px;">⭐ 4.8 (1.2k+ đánh giá)</div>
+                            <div style="font-weight: 700; color: var(--xanh-primary);">Từ 55.000đ</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 16px; align-items: center; background: white; padding: 12px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="width: 80px; height: 80px; border-radius: 12px; background: #eee; flex-shrink: 0; overflow:hidden;">
+                            <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=200&auto=format&fit=crop" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 15px; margin-bottom: 4px;">Burger Gấp Đôi Vị</div>
+                            <div style="font-size: 12px; color: var(--text-gray); margin-bottom: 6px;">⭐ 4.5 (800+ đánh giá)</div>
+                            <div style="font-weight: 700; color: var(--xanh-primary);">Từ 85.000đ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px; padding: 20px; text-align: center; background: var(--xanh-bg); border-radius: 16px; border: 1px dashed var(--xanh-primary);">
+                    <div style="font-size: 24px; margin-bottom: 8px;">🍜</div>
+                    <div style="font-weight: 600; color: var(--xanh-primary);">Đang tìm kiếm thêm nhà hàng...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHAT SCREEN -->
+        <div class="screen" id="chatScreen">
+            <div class="chat-header">
+                <div class="chat-icon-box">🤖</div>
+                <div class="chat-title">Trợ lý ảo Xanh</div>
+                <div class="close-btn" onclick="navigateTo('homeScreen')">✕</div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="sendQuickMessage('Ưu đãi - Khuyến mãi')">💰 Ưu đãi - Khuyến
+                    mãi</button>
+                <button class="quick-btn" onclick="sendQuickMessage('Phản ánh chất lượng Tài xế/ Phương tiện')">⭐ Phản
+                    ánh chất lượng Tài xế/ Phương tiện</button>
+                <button class="quick-btn" onclick="sendQuickMessage('Hỗ trợ thông tin chuyến đi')">📍 Hỗ trợ thông tin
+                    chuyến đi</button>
+                <button class="quick-btn" onclick="sendQuickMessage('Hỗ trợ sự cố giao hàng')">📦 Hỗ trợ sự cố giao
+                    hàng</button>
+                <button class="quick-btn" onclick="sendQuickMessage('Hỗ trợ đơn hàng Xanh ngon')">🍜 Hỗ trợ đơn hàng
+                    Xanh ngon</button>
+                <button class="quick-btn" onclick="sendQuickMessage('Báo cáo sự cố nghiêm trọng/nguy hiểm')">⚠️ Báo cáo
+                    sự cố nghiêm trọng/nguy hiểm</button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-bubble">
+                        Xin chào! Tôi là trợ lý ảo Xanh của Xanh SM. Tôi có thể giúp bạn với:<br><br>
+                        🚗 Khiếu nại về tài xế<br>
+                        🎒 Tìm đồ bị quên trên xe<br>
+                        ❓ Câu hỏi thường gặp<br><br>
+                        Bạn cần hỗ trợ gì hôm nay?
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="chat-input-box">
+                    <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." rows="1"></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Bot Button -->
+        <div class="floating-bot" id="floatingBot" onclick="navigateTo('chatScreen')">
+            <div class="bot-icon">💬</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'https://twoa202600385-ngo-gia-bao-day12.onrender.com/ask';
+        
+        // Session management
+        let threadId = sessionStorage.getItem('xanhsm_thread_id');
+        if (!threadId) {
+            threadId = 'session_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('xanhsm_thread_id', threadId);
+        }
+
+        // Navigation
+        function navigateTo(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+
+            // Hide floating bot on chat screen
+            if (screenId === 'chatScreen') {
+                document.getElementById('floatingBot').style.display = 'none';
+            } else {
+                document.getElementById('floatingBot').style.display = 'flex';
+            }
+        }
+
+        // Chat functionality
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        let isTyping = false;
+        let inactivityTimer;
+        let feedbackShown = false;
+
+        // Inactivity Timer
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            if (feedbackShown) return;
+            
+            inactivityTimer = setTimeout(() => {
+                const chatScreen = document.getElementById('chatScreen');
+                if (chatScreen.classList.contains('active') && !feedbackShown) {
+                    showFeedbackPrompt();
+                }
+            }, 5000);
+        }
+
+        function showFeedbackPrompt() {
+            feedbackShown = true;
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'message bot';
+            feedbackDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-bubble feedback-bubble">
+                    <div class="feedback-title">Bạn có hài lòng với sự hỗ trợ của mình không?</div>
+                    <div class="stars" id="feedbackStars">
+                        <span class="star" onclick="submitFeedback(1)">⭐</span>
+                        <span class="star" onclick="submitFeedback(2)">⭐</span>
+                        <span class="star" onclick="submitFeedback(3)">⭐</span>
+                        <span class="star" onclick="submitFeedback(4)">⭐</span>
+                        <span class="star" onclick="submitFeedback(5)">⭐</span>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(feedbackDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function submitFeedback(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((s, idx) => {
+                if (idx < rating) s.classList.add('active');
+            });
+            
+            setTimeout(() => {
+                addMessage(`Cảm ơn bạn đã đánh giá ${rating} sao! Ý kiến của bạn sẽ giúp mình hoàn thiện hơn. 🙏`, 'bot');
+                document.getElementById('feedbackStars').parentElement.style.opacity = '0.6';
+                document.getElementById('feedbackStars').style.pointerEvents = 'none';
+            }, 500);
+        }
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            resetInactivityTimer();
+        });
+
+        // Send on Enter
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Send message
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || isTyping) return;
+
+            addMessage(text, 'user');
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            showTyping();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-API-Key': '26112003'
+                    },
+                    body: JSON.stringify({ 
+                        question: text,
+                        session_id: threadId
+                    })
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.status === 'success') {
+                    addMessage(data.answer, 'bot');
+
+                    // Logic detected keywords to automatically switch scenes
+                    setTimeout(() => {
+                        const botText = data.answer.toLowerCase();
+
+                        // Exclude transitions if searching for ride/delivery by code
+                        if (botText.includes('mã') || botText.includes('tra cứu') || botText.includes('kết quả')) {
+                            return;
+                        }
+
+                        if (botText.includes('đặt xe') || botText.includes('ô tô') || botText.includes('xe máy') || botText.includes('điểm đến') || botText.includes('chuyến đi tới')) {
+                            navigateTo('mapScreen');
+                        } else if (botText.includes('đồ ăn') || botText.includes('món ăn')) {
+                            navigateTo('foodScreen');
+                        } else if (botText.includes('giao hàng') || botText.includes('vận chuyển')) {
+                            navigateTo('deliveryScreen');
+                        } else if (botText.includes('ưu đãi') || botText.includes('khuyến mãi') || botText.includes('voucher')) {
+                            navigateTo('voucherScreen');
+                        }
+                    }, 1000);
+
+                } else {
+                    addMessage('Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.', 'bot');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping();
+                addMessage('Không thể kết nối với máy chủ. Vui lòng kiểm tra kết nối và thử lại.', 'bot');
+            }
+        }
+
+        // Quick message
+        function sendQuickMessage(text) {
+            chatInput.value = text;
+
+            // Trigger scene transition check for quick actions
+            const lowerText = text.toLowerCase();
+            if (lowerText.includes('ưu đãi') || lowerText.includes('khuyến mãi') || lowerText.includes('voucher')) {
+                navigateTo('voucherScreen');
+            } else if (lowerText.includes('xanh ngon') || lowerText.includes('đồ ăn') || lowerText.includes('món ăn')) {
+                navigateTo('foodScreen');
+            } else if (lowerText.includes('giao hàng') || lowerText.includes('vận chuyển')) {
+                navigateTo('deliveryScreen');
+            } else if (lowerText.includes('đặt xe') || lowerText.includes('chuyến đi')) {
+                // Only navigate if it's not a support/tracking request (already handled by bot response logic)
+                if (!lowerText.includes('hỗ trợ') && !lowerText.includes('sự cố')) {
+                    navigateTo('mapScreen');
+                }
+            }
+
+            sendMessage();
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            msgDiv.innerHTML = `
+                <div class="message-avatar">${sender === 'bot' ? '🤖' : '👤'}</div>
+                <div class="message-bubble">${text.replace(/\n/g, '<br>')}</div>
+            `;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            resetInactivityTimer();
+        }
+
+        // Typing indicator
+        function showTyping() {
+            isTyping = true;
+            sendBtn.disabled = true;
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'message bot';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="typing active">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            isTyping = false;
+            sendBtn.disabled = false;
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+    </script>
+</body>
+
+</html>
