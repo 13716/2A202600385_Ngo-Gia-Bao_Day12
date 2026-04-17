@@ -73,13 +73,13 @@ async def lifespan(app: FastAPI):
 # ─────────────────────────────────────────────────────────
 app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
 
-# Bật CORS (Rất quan trọng để các web UI bên ngoài gọi được API)
+# Bật CORS (Cấu hình siêu tương thích cho mọi trình duyệt)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False, # Phải để False nếu allow_origins là "*"
+    allow_credentials=False,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "X-API-Key", "Authorization", "Accept"],
 )
 
 @app.post("/ask")
