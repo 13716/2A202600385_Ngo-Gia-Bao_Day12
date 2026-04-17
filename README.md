@@ -1,110 +1,76 @@
-# Day 12 — Deployment: Đưa Agent Lên Cloud
+# Day 12 — Deployment & Microservices: Đưa AI Agent Lên Cloud
 
-> **AICB-P1 · VinUniversity 2026**  
-> Repository thực hành đi kèm bài giảng Day 12.  
-> Mỗi phần có ví dụ **cơ bản** (hiểu concept) và **chuyên sâu** (production-ready).
+> **Sinh viên:** Ngô Gia Bảo  
+> **Mã số SV:** 2A202600385  
+> **Nền tảng:** Render & Docker  
+
+🚀 **Link Public API (Render):** `https://twoa202600385-ngo-gia-bao-day12.onrender.com`
+
+Đồ án này là ứng dụng hoàn chỉnh cho khóa học Hệ thống và Đám mây (Day 12), nơi xây dựng một Agent "chuẩn Production" có khả năng chống chịu tải cao, thiết kế Stateless, có trí nhớ Chat và giao tiếp độc lập với các Frontend UI, ví dụ như giao diện **XanhSM-AI**.
 
 ---
 
-## Cấu Trúc Project
+## 🎯 Chức Năng Nổi Bật
 
+1. **Docker Tối Ưu (Multi-stage Build)**  
+   Dockerfile được thiết kế theo 2 bước (Builder & Runtime), sử dụng non-root user `appuser` để khóa chặt tính bảo mật và tối ưu dung lượng siêu nhỏ.
+
+2. **Thiết Kế Phi Trạng Thái (Stateless & Redis)**  
+   Lịch sử trò chuyện (`Conversation History`) cực nhẹ nhờ lưu ở cụm cơ sở dữ liệu phân tán (Redis). Bất kể Nginx có Load Balance (Cân bằng tải) sang bao nhiêu instance Agent khác nhau, hệ thống vẫn "nhớ" được người dùng đang nói gì.
+
+3. **Rate Limiting (Sliding Window)**  
+   Tối giản spam hiệu quả với giới hạn 5 requests/phút áp dụng công nghệ *Sliding Window* bằng `ZSET` của Redis (Kiểm thử báo lỗi chuẩn `429 Too Many Requests`).
+
+4. **Bảo Vệ Ngân Sách (Cost Guard)**  
+   Mỗi token gọi AI (mock) đều được tính toán và cộng dồn ra USD. Nếu vượt quá giới hạn 10 USD/tháng, sẽ từ chối gọi vào mô hình LLM qua lỗi `402 Payment Required`.
+
+5. **API Gateway & CORS**  
+   Bảo vệ truy cập thông qua Auth Header `X-API-Key`. Đồng thời, đã mở cổng `CORS` để chia sẻ cho các Backend Frontend ngoài luồng kết nối vào dễ dàng (VD: Dự án XanhSM-AI.html đã được tích hợp gọi thẳng lên Cloud API này).
+
+---
+
+## 📁 Cấu Trúc Dự Án (Điểm nhấn)
+
+```text
+2A202600385_Ngo-Gia-Bao_Day12/
+├── my-production-agent/          # 🌟 DỰ ÁN CUỐI CÙNG HOÀN THIỆN
+│   ├── app/                      
+│   │   ├── main.py               # (FastAPI: CORS, Gateway, Routing)
+│   │   ├── rate_limiter.py       # (Thuật toán Sliding Window)
+│   │   ├── cost_guard.py         # (Chặn vượt quá 10$)
+│   │   └── config.py             
+│   ├── Dockerfile                # (Đã tối ưu 2-stage cực đỉnh)
+│   ├── docker-compose.yml        # (Sinh 3 Agent + Nginx Load Balancer)
+│   ├── nginx.conf                # (Load Balancer File)
+│   ├── test_history.py           # (File Test chạy ngữ cảnh Chatbot)
+│   └── test_agent.py             # (File Test Rate limit 429)
+├── XanhSM-AI/                    
+│   └── xanhsm-app.html           # 🚗 Giao diện UI đã nối link thẳng vào Render
+├── DEPLOYMENT.md                 # Yêu cầu Deployment của Lab
+└── DAY12_DELIVERY_CHECKLIST.md   # Phiếu nộp bài
 ```
-day12_ha-tang-cloud_va_deployment/
-├── 01-localhost-vs-production/     # Section 1: Dev ≠ Production
-│   ├── develop/                      #   Agent "đúng kiểu localhost"
-│   └── production/                   #   12-Factor compliant agent
-│
-├── 02-docker/                      # Section 2: Containerization
-│   ├── develop/                      #   Dockerfile đơn giản
-│   └── production/                   #   Multi-stage + Docker Compose stack
-│
-├── 03-cloud-deployment/            # Section 3: Cloud Options
-│   ├── railway/                    #   Deploy Railway (< 5 phút)
-│   ├── render/                     #   Deploy Render + render.yaml
-│   └── production-cloud-run/         #   GCP Cloud Run + CI/CD
-│
-├── 04-api-gateway/                 # Section 4: Security
-│   ├── develop/                      #   API Key authentication
-│   └── production/                   #   JWT + Rate Limiting + Cost Guard
-│
-├── 05-scaling-reliability/         # Section 5: Scale & Reliability
-│   ├── develop/                      #   Health check + graceful shutdown
-│   └── production/                   #   Stateless + Redis + Nginx LB
-│
-├── 06-lab-complete/                # Lab 12: Production-ready agent
-│   └── (full project kết hợp tất cả)
-│
-└── utils/                          # Mock LLM dùng chung (không cần API key)
-```
 
 ---
 
-## 🚀 Bắt Đầu Nhanh
+## 💻 Hướng Dẫn Chạy Trên Local Của Bạn
 
-**Muốn thử ngay?** → [QUICK_START.md](QUICK_START.md) (5 phút)
-
-**Muốn học kỹ?** → [CODE_LAB.md](CODE_LAB.md) (3-4 giờ)
-
-## Cách Học
-
-| Bước | Làm gì |
-|------|--------|
-| 0 | **[Khuyến nghị]** Đọc [QUICK_START.md](QUICK_START.md) để thử nhanh |
-| 1 | Đọc [CODE_LAB.md](CODE_LAB.md) để hiểu chi tiết |
-| 2 | Chạy ví dụ **basic** trước — hiểu concept |
-| 3 | So sánh với ví dụ **advanced** — thấy sự khác biệt |
-| 4 | Tự làm Lab 06 từ đầu trước khi xem solution |
-| 5 | Tham khảo [QUICK_REFERENCE.md](QUICK_REFERENCE.md) khi cần |
-| 6 | Xem [TROUBLESHOOTING.md](TROUBLESHOOTING.md) khi gặp lỗi |
-
----
-
-## Yêu Cầu
+Dự án này sử dụng Nginx để cân bằng tải chia đều sức ép qua **3 Agent Instances** song song:
 
 ```bash
-python 3.11+
-docker & docker compose
+# 1. Khởi chạy 3 Agent thông qua Docker Compose
+cd my-production-agent
+docker compose up -d --build --scale agent=3
+
+# 2. Chạy bài Test Rate Limit
+python test_agent.py
+
+# 3. Chạy bài Test Trí Nhớ & Tiêu Hao Ngân Sách
+python test_history.py
+
+# 4. Tắt Server nếu không dùng
+docker compose down
 ```
 
-Mỗi folder có `requirements.txt` riêng. Không cần API key thật — các ví dụ dùng **mock LLM** để chạy offline.
+## 🌐 Trải nghiệm Trực tiếp (Cloud UI)
 
----
-
-## Sections
-
-| # | Folder | Concept chính |
-|---|--------|--------------|
-| 1 | `01-localhost-vs-production` | Dev/prod gap, 12-factor, secrets |
-| 2 | `02-docker` | Dockerfile, multi-stage, docker-compose |
-| 3 | `03-cloud-deployment` | Railway, Render, Cloud Run |
-| 4 | `04-api-gateway` | Auth, rate limiting, cost protection |
-| 5 | `05-scaling-reliability` | Health check, stateless, rolling deploy |
-| 6 | `06-lab-complete` | **Full production agent** |
-
----
-
-## 📚 Lab Materials
-
-Chúng tôi đã chuẩn bị đầy đủ tài liệu hướng dẫn:
-
-### Cho Sinh Viên
-
-| Tài liệu | Mô tả | Thời gian |
-|----------|-------|-----------|
-| **[CODE_LAB.md](CODE_LAB.md)** | Hướng dẫn lab chi tiết từng bước | 3-4 giờ |
-| **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** | Cheat sheet các lệnh và patterns | Tra cứu |
-| **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Giải quyết lỗi thường gặp | Khi cần |
-
-### Cho Giảng Viên
-
-| Tài liệu | Mô tả |
-|----------|-------|
-| **[INSTRUCTOR_GUIDE.md](INSTRUCTOR_GUIDE.md)** | Hướng dẫn chấm điểm và đánh giá |
-
-### Cách Sử Dụng
-
-1. **Trước lab:** Đọc [CODE_LAB.md](CODE_LAB.md) để hiểu tổng quan
-2. **Trong lab:** Làm theo từng Part, tham khảo [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
-3. **Gặp lỗi:** Xem [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-4. **Sau lab:** Nộp Part 6 Final Project để chấm điểm
-#
+Không cần cài đặt, bạn chỉ việc tải file `XanhSM-AI/xanhsm-app.html` trên repo này xuống, bấm đúp chuột lên để hiện ra Giao Diện Chatbot và nhắn tin. Bộ não của bạn XanhSM đang nằm trên Render Mỹ sẽ xử lý ngay lập tức!
