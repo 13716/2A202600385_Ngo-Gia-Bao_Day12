@@ -39,7 +39,7 @@
 │   │   ├── rate_limiter.py       # (Thuật toán Sliding Window)
 │   │   ├── cost_guard.py         # (Chặn vượt quá 10$)
 │   │   └── config.py             
-│   ├── Dockerfile                # (Đã tối ưu 2-stage cực đỉnh)
+│   ├── Dockerfile                # (Đã tối ưu 2-stage )
 │   ├── docker-compose.yml        # (Sinh 3 Agent + Nginx Load Balancer)
 │   ├── nginx.conf                # (Load Balancer File)
 │   ├── test_history.py           # (File Test chạy ngữ cảnh Chatbot)
