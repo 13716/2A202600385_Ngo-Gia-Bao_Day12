@@ -10,8 +10,9 @@ class Settings(BaseSettings):
     PORT: int = 8000
     HOST: str = "0.0.0.0"
 
-    # Security
+    # Security & AI
     AGENT_API_KEY: str = "super-secret-key-123"
+    GEMINI_API_KEY: str = "" 
     ALLOWED_ORIGINS: List[str] = ["*"]
 
     # Redis

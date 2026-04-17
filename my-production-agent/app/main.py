@@ -15,7 +15,7 @@ from .config import settings
 from .auth import verify_api_key
 from .rate_limiter import check_rate_limit, r as redis_client
 from .cost_guard import check_and_record_cost
-from utils.mock_llm import ask as llm_ask
+from .llm_engine import ask_gemini
 
 # ─────────────────────────────────────────────────────────
 # Logging Setup
@@ -122,7 +122,11 @@ async def ask(
     # 3. Chạy Agent
     # Trong thực tế, bạn sẽ truyền `get_history(...)` vào LLM ở bước này.
     start_time = time.time()
-    answer = llm_ask(body.question)
+    history = get_history(user_id, session_id)
+    # Bước 3: Gọi "Trí tuệ nhân tạo" thật (Gemini)
+    answer = await ask_gemini(body.question, history)
+    
+    # Bước 4: Lưu vào lịch sử Redis (Lưu cả context mới)
     duration = time.time() - start_time
     
     # Tính phí cho phần completion

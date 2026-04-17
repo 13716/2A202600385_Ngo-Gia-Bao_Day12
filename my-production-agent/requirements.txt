@@ -1,7 +1,10 @@
-fastapi[all]
-uvicorn
+fastapi
+uvicorn[standard]
+pydantic
 pydantic-settings
 redis
+google-generativeai
+python-dotenv
 python-jose[cryptography]
 passlib[bcrypt]
 pydantic>=2.0.0
