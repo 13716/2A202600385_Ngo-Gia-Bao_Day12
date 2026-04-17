@@ -8,6 +8,9 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 from .config import settings
 from .auth import verify_api_key
 from .rate_limiter import check_rate_limit, r as redis_client
@@ -82,11 +85,18 @@ app.add_middleware(
     allow_headers=["Content-Type", "X-API-Key", "Authorization", "Accept"],
 )
 
+# Mount các file tĩnh (ảnh, css) nếu có trong thư mục XanhSM-AI
+if os.path.exists("XanhSM-AI"):
+    app.mount("/static", StaticFiles(directory="XanhSM-AI"), name="static")
+
 @app.get("/")
 async def root():
+    # Phục vụ file giao diện XanhSM ngay tại trang chủ
+    index_file = os.path.join("XanhSM-AI", "xanhsm-app.html")
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
     return {
-        "message": "Welcome to Production AI Agent API",
-        "status": "online",
+        "message": "API is online, but HTML file not found",
         "author": "Ngo Gia Bao"
     }
 

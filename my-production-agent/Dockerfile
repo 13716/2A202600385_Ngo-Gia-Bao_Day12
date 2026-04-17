@@ -16,6 +16,7 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 COPY app/ ./app/
 COPY utils/ ./utils/
+COPY XanhSM-AI/ ./XanhSM-AI/
 
 # Set PYTHONPATH to include /app for module discovery
 ENV PYTHONPATH=/app
