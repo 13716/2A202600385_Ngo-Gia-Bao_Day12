@@ -7,25 +7,29 @@ logger = logging.getLogger(__name__)
 # Cấu hình Gemini
 if settings.GEMINI_API_KEY:
     genai.configure(api_key=settings.GEMINI_API_KEY)
-else:
-    logger.warning("GEMINI_API_KEY is missing. Real LLM will not work.")
 
 async def ask_gemini(question: str, history: list = None) -> str:
-    """
-    Hàm gọi trí tuệ thật từ Google Gemini
-    """
     if not settings.GEMINI_API_KEY:
-        return "Lỗi máy chủ: Thiếu GEMINI_API_KEY. Vui lòng cấu hình trên Render."
+        return "Lỗi: Vui lòng cấu hình GEMINI_API_KEY trên Render."
 
-    try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        
-        # Chuyển đổi chat history sang định dạng Gemini
-        chat_session = model.start_chat(history=[]) # Có thể tối ưu thêm history ở đây
-        
-        # Gửi tin nhắn mới
-        response = chat_session.send_message(question)
-        return response.text
-    except Exception as e:
-        logger.error(f"Gemini Error: {str(e)}")
-        return f"Xin lỗi, trí tuệ nhân tạo đang bận (Error: {str(e)[:50]}...)"
+    # Danh sách các model để thử (từ mới đến cũ để đảm bảo không lỗi 404)
+    model_names = ["gemini-1.5-flash", "gemini-pro"]
+    
+    last_error = ""
+    for name in model_names:
+        try:
+            logger.info(f"Trying Gemini model: {name}")
+            model = genai.GenerativeModel(name)
+            
+            # Khởi tạo chat với system instruction đơn giản
+            chat = model.start_chat(history=[])
+            response = chat.send_message(question)
+            
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            last_error = str(e)
+            logger.warning(f"Model {name} failed: {last_error}")
+            continue # Thử model tiếp theo
+            
+    return f"Xin lỗi, chatbot đang bảo trì. (Chi tiết lỗi: {last_error[:100]})"
